@@ -82,7 +82,7 @@ class Twint:
                             favorite_err_cnt += 1
                             time.sleep(1)
                         if favorite_err_cnt == 5:
-                            print("Favorite page could not be fetched")
+                            sys.stderr.write("Favorite page could not be fetched")
                     if not self.count % 40:
                         time.sleep(5)
                 elif self.config.Followers or self.config.Following:
@@ -94,13 +94,15 @@ class Twint:
                         self.feed, self.init = feed.parse_tweets(self.config, response)
                     except NoMoreTweetsException as e:
                         logme.debug(__name__ + ':Twint:Feed:' + str(e))
-                        print('[!] ' + str(e) + ' Scraping will stop now.')
-                        print('found {} deleted tweets in this search.'.format(len(self.config.deleted)))
+                        sys.stderr.write(e)
+                        sys.stderr.write('is it though? because sometimes twitter lie.')
+                        sys.stderr.write('[!] ' + str(e) + ' Scraping will stop now.')
+                        sys.stderr.write('found {} deleted tweets in this search.'.format(len(self.config.deleted)))
                         break
                 break
             except TimeoutError as e:
                 if self.config.Proxy_host.lower() == "tor":
-                    print("[?] Timed out, changing Tor identity...")
+                    sys.stderr.write("[?] Timed out, changing Tor identity...")
                     if self.config.Tor_control_password is None:
                         logme.critical(__name__ + ':Twint:Feed:tor-password')
                         sys.stderr.write("Error: config.Tor_control_password must be set for proxy auto-rotation!\r\n")
@@ -113,11 +115,11 @@ class Twint:
                         continue
                 else:
                     logme.critical(__name__ + ':Twint:Feed:' + str(e))
-                    print(str(e))
+                    sys.stderr.write(str(e))
                     break
             except Exception as e:
                 if self.config.Profile or self.config.Favorites:
-                    print("[!] Twitter does not return more data, scrape stops here.")
+                    sys.stderr.write("[!] Twitter does not return more data, scrape stops here.")
                     break
 
                 logme.critical(__name__ + ':Twint:Feed:noData' + str(e))
@@ -199,7 +201,7 @@ class Twint:
 
             except Exception as e:
                 logme.critical(__name__ + ':Twint:favorite:favorite_field_lack')
-                print("shit: ", date_str, " ", str(e))
+                sys.stderr.write("shit: " + date_str + " " + str(e))
 
         try:
             self.config.favorited_tweets_list += favorited_tweets_list
